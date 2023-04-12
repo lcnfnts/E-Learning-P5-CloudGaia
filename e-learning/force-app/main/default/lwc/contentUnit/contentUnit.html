@@ -1,0 +1,22 @@
+<template>
+    <lightning-layout multiple-rows>
+        <lightning-layout-item size="12">
+            <lightning-card  title={unitData.Name}>
+                <div class="p-1">
+                    <p> {unitData.Content__c}
+                    </p>
+                    <div for:each={unitQuestions} for:item="question" key={question.Id}>
+                        <lightning-card>
+                            <lightning-radio-group name="radioGroup"
+                                label={question.Content}
+                                options={question.Answers}
+                                value={value}
+                                type="radio">
+                            </lightning-radio-group>
+                        </lightning-card>
+                    </div>
+                </div>
+            </lightning-card>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>
