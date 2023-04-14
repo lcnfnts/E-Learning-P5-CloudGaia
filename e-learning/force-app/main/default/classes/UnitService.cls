@@ -28,7 +28,7 @@ public class UnitService {
 			User_Module__c umToCreate = new User_Module__c();
             umToCreate.Module__c = unit.Module__c;
             umToCreate.User__c = userId; //UserInfo.getUserId();
-            umToCreate.Name = 'Modulo'; 
+            umToCreate.Name = 'Module'; 
             umToCreate.Status__c = 'In progress';
             insert umToCreate;
             

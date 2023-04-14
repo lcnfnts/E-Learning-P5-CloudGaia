@@ -1,5 +1,5 @@
 <template>
-    <lightning-layout multiple-rows>
+    <lightning-layout class="padding" multiple-rows>
         <!-- Top -->
         <lightning-layout-item size="12">
             <lightning-card  title="Trail View">
@@ -16,11 +16,11 @@
                         </p>
                     </lightning-layout-item>
                     <lightning-layout-item size="1">
-                        <p>TIME</p>
+                        <p class="strong">TIME</p>
                         <p>{trailData.Total_Time__c}</p>
                     </lightning-layout-item>
                     <lightning-layout-item size="1">
-                        <p>SCORE</p>
+                        <p class="strong">SCORE</p>
                         <p>+{trailData.Total_Score__c}</p>
                     </lightning-layout-item>
                 </lightning-layout>
@@ -40,11 +40,11 @@
                                     </p>
                                 </lightning-layout-item>
                                 <lightning-layout-item size="1">
-                                    <p>TIME</p>
+                                    <p class="strong">TIME</p>
                                     <p>{module.Time}</p>
                                 </lightning-layout-item>
                                 <lightning-layout-item size="1">
-                                    <p>SCORE</p>
+                                    <p class="strong">SCORE</p>
                                     <p>+{module.Score}</p>
                                 </lightning-layout-item>
                                 <c-unit-list module-id={module.Id}  ></c-unit-list>

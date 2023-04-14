@@ -3,7 +3,7 @@ import getUnitList from '@salesforce/apex/UnitService.getUnitList';
 
 const columns = [
     { 
-        label: 'Modulo', 
+        label: 'Unidades', 
         type: 'url',
         typeAttributes: {
             label: { fieldName: 'module' },

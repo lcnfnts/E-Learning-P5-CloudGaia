@@ -1,7 +1,7 @@
 <template>
-    <lightning-layout multiple-rows>
+    <lightning-layout class="padding" multiple-rows>
         <lightning-layout-item size="12">
-            <lightning-card  title={unitData.Name}>
+            <lightning-card  title={unitData.Name} >
                 <div if:true={successAlert} class="card-alert-success slds-align_absolute-center">
                     <h3 class="slds-text-heading_large">SUCCESS</h3>
                     <h4>You have completed the {unitData.Name} unit!</h4>
@@ -13,7 +13,7 @@
                 <div class="p-1">
                     <p> {unitData.Content__c}
                     </p>
-                    <div for:each={unitQuestions} for:item="question" key={question.Id}>
+                    <div class="content__questions" for:each={unitQuestions} for:item="question" key={question.Id}>
                         <lightning-card>
                             <lightning-radio-group name={question.Id}
                                 label={question.Content}

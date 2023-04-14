@@ -1,3 +1,7 @@
+.padding{
+    padding-left: 10%;
+    padding-right: 10%;
+}
 .p-1 {
     padding: 20px;
 }
@@ -17,4 +21,13 @@
     background-color: #ff3d3d !important;
     border-radius: 5px;
     color: white;
+}
+
+.content__questions {
+    border: 1px solid #b7b7b7;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 5px;
+    margin-bottom: 5px;
+
 }
