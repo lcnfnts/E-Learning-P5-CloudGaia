@@ -2,7 +2,7 @@ public class UnitService {
     
     @AuraEnabled(cacheable=false)
     public static boolean validateUnit(Id unitId, Map<Id,Id> response){
-        Id UserID = '005Dp000001ZTIHIA4';//UserInfo.getUserId();//
+        Id UserID = UserInfo.getUserId();
         Boolean unitSucces = true;
         
         // Isertar o actualizar en la tabla user unit el registro de la unidad
@@ -117,7 +117,7 @@ public class UnitService {
     public static TrailWrapper getTrailWrapper(Id trailId){
      	
         TrailWrapper trailSummary = new TrailWrapper();
-        Id userId = '005Dp000001ZyXNIA0';
+        Id userId = UserInfo.getUserId();
         
         // Se busca la información del trail
         Trail__c trailData = [SELECT Id, 

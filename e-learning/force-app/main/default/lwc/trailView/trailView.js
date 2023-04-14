@@ -3,12 +3,11 @@ import getTrailWrapper from '@salesforce/apex/UnitService.getTrailWrapper';
 
 export default class TrailView extends LightningElement {
     
-    @api
-    trailId = 'a00Dp0000010z4PIAQ';
+    @api recordId= '';
     moduleData = [];
     trailData = [];
 
-    @wire(getTrailWrapper, {trailId : 'a00Dp0000010z4PIAQ'})
+    @wire(getTrailWrapper, {trailId : '$recordId'})
     trailWrapper(result){
     //    console.log('TrailId ' + this.trailId);
     //    console.log('Hay datos');

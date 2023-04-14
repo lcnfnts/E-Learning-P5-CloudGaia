@@ -46,16 +46,27 @@ trigger validateUnitTrigger on User_Unit__c (after update) {
                     }
                 }
             }
+            
             User_Unit__c uu = [SELECT Id,
-                               		Status__c
+                               	Status__c,
+                               	Score__c
                               FROM User_Unit__c
                               WHERE Id =: Trigger.new[i].Id];
             
             if(unitSuccess == true){
+                Unit__c unit = [SELECT 
+                               Id,
+                               Score__c
+                              FROM Unit__c
+                              WHERE Id =: Trigger.new[i].Unit__c];
+                
+                uu.Score__c = unit.Score__c;
                 uu.Status__c = 'Success';
+                
             } else {
                 uu.Status__c = 'Fail';
             }
+            
             update uu;
         }
     }
