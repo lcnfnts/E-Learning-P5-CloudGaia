@@ -1,3 +1,20 @@
 .p-1 {
     padding: 20px;
 }
+
+.card-alert-success{
+    border: 2px solid #45C95A;
+    background-color: #88e197 !important;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.card-alert-fail{
+    border: 2px solid #e11111;
+    background-color: #ff3d3d !important;
+    border-radius: 5px;
+    color: white;
+}

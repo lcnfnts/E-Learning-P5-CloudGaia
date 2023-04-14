@@ -1,75 +1,118 @@
 public class UnitService {
     
-    public static boolean user_unit_register(Id uId, String strJs){
-        // Se insertan registros para completar  el objeto "User Unit"
-        Unit__c uResponse = [SELECT Module__c,
-                                 (SELECT Id, Name 
-                                  FROM Questions__r) 
-                             FROM Unit__c 
-                             WHERE Id =:uId];  
+    @AuraEnabled(cacheable=false)
+    public static boolean validateUnit(Id unitId, Map<Id,Id> response){
+        Id UserID = '005Dp000001ZTIHIA4';//UserInfo.getUserId();//
+        Boolean unitSucces = true;
         
-        User_Module__c userModule = NULL;
-        //Se trajo el Id de User Module
-        userModule = [SELECT Id
-                        FROM User_Module__c
-                        WHERE User__c =:UserInfo.getUserId() 
-                      	AND Module__c =:uResponse.Module__c];
+        // Isertar o actualizar en la tabla user unit el registro de la unidad
+        // Se trae de la base de datos la unidad en la que está resolviendo preguntas el Usuario
+        Unit__c unit = [SELECT Id,
+                        	Name,
+                        	Score__c,
+                        	Module__c
+                       FROM Unit__c
+                       WHERE Id =: unitId];
         
-        if(userModule == NULL){
-			userModule = new User_Module__c(Module__c = uResponse.Module__c, 
-                                            User__c = UserInfo.getUserId(), 
-                                            Status__c = 'In Progress');    
-            insert userModule;
-        }	
-        // Seleccionar el número de intentos de una unidad específica y el usuario logueado
-        List<User_Unit__c> listUserUnit =[SELECT Id, 
-                                          	Attempts__c 
-                                          FROM User_Unit__c 
-                                          WHERE User__c =:UserInfo.getUserId() 
-                                          AND Unit__c =:uId];
-        // Guardamos en numero de la mayor cantidad de intentos en max Attempt
-        Integer maxAttempt = -1;
-        if(!listUserUnit.isEmpty()){
-            for(User_Unit__c userU : listUserUnit){
-            	if(userU.Attempts__c > maxAttempt){
-                	maxAttempt = userU.Attempts__c.intValue();
-            	}
-        	}
+        
+        //Crear modulo en progreso sí no existe
+        List<User_Module__c> userModule = [SELECT Id,
+                                           Name,
+                                           Progress__c,
+                                           Status__c,
+                                           Check__c
+                                          FROM User_Module__c
+                                          WHERE User__c =: UserId //UserInfo.getUserId()
+                                          AND Module__c =: unit.Module__c];
+        if(userModule.Size() == 0){
+			User_Module__c umToCreate = new User_Module__c();
+            umToCreate.Module__c = unit.Module__c;
+            umToCreate.User__c = userId; //UserInfo.getUserId();
+            umToCreate.Name = 'Modulo'; 
+            umToCreate.Status__c = 'In progress';
+            insert umToCreate;
+            
+            userModule.Add(umToCreate);
+        } 
+        
+        //Se trae de la base de datos los campos donde se debe insertar o actualizar la información traida del front 
+        //para el usuario logueado, la data se guarda en 'User_Unit__c'
+		List<User_Unit__c> uuToUpsert = [SELECT Id,
+                      		Name,
+                      		User__c,
+                      		Status__c,
+                      		Score__c,
+                      		Attempts__c,
+                      		Unit__c
+                     FROM User_Unit__c
+                     WHERE User__c =: UserID//UserInfo.getUserId()
+                     AND Unit__c =: unitId];
+        
+        //Si no hay nada dentro de la búsqueda, se inserta el registro por primera vez y se agrega el estado de 'Draft'
+        if(uuToUpsert.Size() == 0){
+            User_Unit__c uuToCreate = new User_Unit__c();
+            uuToCreate.Name = unit.Name;
+            uuToCreate.User__c = UserID;// UserInfo.getUserId();
+            uuToCreate.Status__c ='Draft';
+            uuToCreate.Score__c = 0;
+            uuToCreate.Attempts__c = 1;
+            uuToCreate.Unit__c = unit.Id;
+            uuToCreate.User_Module__c = userModule[0].Id;
+            insert uuToCreate;
+            
+            uuToUpsert.Add(uuToCreate);
+            //Se inserta a una lista de Respuestas de usuario el valor de la pregunta/Respuesta traidas por parametro desde el front
+            List<User_Response__c> uResponse = new List<User_Response__c>();
+            for(Id key : response.KeySet()){
+                User_Response__c u = new User_Response__c();
+                u.Answer__c = response.get(key);
+                u.Question__c = key;
+                u.Unit_User__c = uuToUpsert[0].Id;
+                uResponse.add(u);
+            }
+            insert uResponse;
+            
+        } //Si el usuario ya tiene registrada esa unidad se actualiza el estado y las nuevas respuestas traidas del front
+        else{
+            uuToUpsert[0].Status__c ='Draft';
+            update uuToUpsert;
+            List<User_Response__c> storedResponses = [SELECT Id,
+                                                      		Answer__c,
+                                                      		Question__c,
+                                                      		Unit_User__c
+                                                      FROM User_Response__c
+                                                     WHERE Unit_User__c =: uuToUpsert[0].Id ];
+            
+            for(Integer i=0 ; i<storedResponses.size() ; i++){
+                storedResponses[i].Answer__c = response.get(storedResponses[i].Question__c);
+            }
+            update storedResponses;
+            
         }
+        //Se dispara el trigger con el cambio de estado
+        uuToUpsert[0].Status__c = 'Answered';
+        update uuToUpsert;
+        //Después de dispararse el trigger se vuelve a consultar la información del User_Unit para comprobar el ESTADO.
+        User_Unit__c uuValidate = [SELECT Id,
+                      		Name,
+                      		User__c,
+                      		Status__c,
+                      		Score__c,
+                      		Attempts__c,
+                      		Unit__c
+                     FROM User_Unit__c
+                     WHERE Id =: uuToUpsert[0].Id];
         
-        
-        //insertar Usuario_Unidad
-        User_Unit__c uInsert = new User_Unit__c(User_Module__c = userModule.id, 
-                                                User__c = UserInfo.getUserId(), 
-                                                Status__c = 'Draft');
-        
-        if(!(maxAttempt == -1)){
-            uInsert.Attempts__c = maxAttempt + 1;
-        } else {
-            uInsert.Attempts__c = 1;
+        //Dependiendo del estado retornado por el trigger, se retorna que la respuesta fue verdadera o falsa
+        if(uuValidate.Status__c == 'Success'){
+            unitSucces = True; 
+            
+        } else if(uuValidate.Status__c == 'Fail'){
+            unitSucces = False; 
         }
-        
-		insert uInsert;
-        
-        List <User_Response__c> responseList = new List<User_Response__c>();
-        
-        Map<Id,Id> p_r_Map = (Map<Id,Id>)JSON.deserialize(strJs,Map<Id,Id>.class);
-        
-        for(Question__c pr : uResponse.Questions__r){	
-            User_Response__c response = new User_Response__c(Answer__c = p_r_Map.get(pr.Id),
-                                                              Unit_User__c = uInsert.Id,
-                                                              Question__c = pr.Id);
-            responseList.add(response);
-        }
-        insert responseList;
-        
-        uInsert.Status__c = 'Answered';
-        
-        update uInsert;
-        
-        return true;  
+        return unitSucces;        
     }
-    //cambié el nombre de este método
+    
     @AuraEnabled(cacheable=true)
     public static TrailWrapper getTrailWrapper(Id trailId){
      	
@@ -79,9 +122,9 @@ public class UnitService {
         // Se busca la información del trail
         Trail__c trailData = [SELECT Id, 
                               		Name,
-                              		Total_Time__c,
-                             		Total_Score__c,
-                              		Description__c
+                              		Description__c,
+                              		Total_Score__c,
+                                    Total_Time__c
                              FROM Trail__c
                              WHERE Id =: trailId];
         
@@ -134,7 +177,6 @@ public class UnitService {
     
     @AuraEnabled(cacheable=true)
     public static unitWrapper getUnitWrapper(Id unitId){
-        
         unitWrapper unitSummary = new unitWrapper();
         Unit__c unit = [SELECT Id,
                         		Name,
