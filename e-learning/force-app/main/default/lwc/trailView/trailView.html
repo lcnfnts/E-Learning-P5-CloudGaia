@@ -1,0 +1,58 @@
+<template>
+    <lightning-layout class="padding" multiple-rows>
+        <!-- Top -->
+        <lightning-layout-item size="12">
+            <lightning-card  title="Trail View">
+                <lightning-layout multiple-rows class="slds-p-horizontal_small">
+                    <lightning-layout-item size="1">
+                        <img style="width:70px ; float:right" src="https://static.vecteezy.com/system/resources/previews/004/753/004/non_2x/case-study-icon-shadowed-detailed-case-study-logo-free-vector.jpg" alt="image" class="image">
+                    </lightning-layout-item>
+                    <lightning-layout-item size="9">
+                        <p class="content__title">
+                            {trailData.Name}
+                        </p>
+                        <p class="content__description">
+                            {trailData.Description__c}
+                        </p>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="1">
+                        <p class="strong">TIME</p>
+                        <p>{trailData.Total_Time__c}</p>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="1">
+                        <p class="strong">SCORE</p>
+                        <p>+{trailData.Total_Score__c}</p>
+                    </lightning-layout-item>
+                </lightning-layout>
+                <div for:each={moduleData} for:item="module" key={module.Id} class="p-1 bg-white">
+                    <div class="card-item-style">
+                        <lightning-card class="mb-1">
+                            <lightning-layout multiple-rows class="slds-p-horizontal_small">
+                                <lightning-layout-item size="1" if:true={module.Check}>
+                                    <img style="width:30px" src="https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/sign-check-icon.png">
+                                </lightning-layout-item>
+                                <lightning-layout-item size="1" if:false={module.Check}>
+                                    <img style="width:25px" src="https://cdn.iconscout.com/icon/free/png-256/check-187-444565.png?f=webp&w=40">
+                                </lightning-layout-item>
+                                <lightning-layout-item size="9">
+                                    <p class="content__title">
+                                        {module.Name}
+                                    </p>
+                                </lightning-layout-item>
+                                <lightning-layout-item size="1">
+                                    <p class="strong">TIME</p>
+                                    <p>{module.Time}</p>
+                                </lightning-layout-item>
+                                <lightning-layout-item size="1">
+                                    <p class="strong">SCORE</p>
+                                    <p>+{module.Score}</p>
+                                </lightning-layout-item>
+                                <c-unit-list module-id={module.Id}  ></c-unit-list>
+                            </lightning-layout>
+                        </lightning-card>
+                    </div>
+                </div>
+            </lightning-card>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

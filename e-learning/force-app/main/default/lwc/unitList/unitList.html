@@ -1,0 +1,9 @@
+<template>
+    <template if:true={unitData.length}>
+        <lightning-datatable
+            key-field="Id"
+            data={unitData}
+            columns={columns}>
+        </lightning-datatable>
+    </template>
+</template>
